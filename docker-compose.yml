@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # 🔹 Base de Datos MySQL - Nombre personalizado con "abarca"
+  db-abarca:
+    image: mysql:8.0
+    container_name: mysql-abarca-container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Abarca@234
+      MYSQL_DATABASE: authorstore
+      MYSQL_USER: wilver
+      MYSQL_PASSWORD: Abarca@234
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-abarca-data:/var/lib/mysql
+    networks:
+      - abarca-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pAbarca@234"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 🔹 Backend API en Go - Nombre personalizado con "wilver"
+  api-wilver:
+    build:
+      context: ./CRUDAPI
+      dockerfile: Dockerfile
+    container_name: golang-wilver-api
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      DB_USER: root
+      DB_PASSWORD: Abarca@234
+      DB_HOST: db-abarca
+      DB_PORT: 3306
+      DB_NAME: authorstore
+    depends_on:
+      db-abarca:
+        condition: service_healthy
+    networks:
+      - abarca-network
+
+
+  frontend-abarca:
+    build:
+      context: ./Frontend/crud
+      dockerfile: Dockerfile
+    container_name: react-abarca-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - api-wilver
+    networks:
+      - abarca-network
+    environment:
+      - VITE_API_URL=http://localhost:5000
+
+# 🔹 Volúmenes persistentes
+volumes:
+  mysql-abarca-data:
+    driver: local
+
+# 🔹 Red interna personalizada
+networks:
+  abarca-network:
+    driver: bridge
