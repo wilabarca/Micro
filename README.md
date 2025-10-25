@@ -68,7 +68,7 @@ Sistema de gestión de biblioteca digital implementado con arquitectura de micro
 
 ### Paso 1: Clonar el Repositorio
 ```bash
-git clone [TU_REPOSITORIO_URL]
+git clone https://github.com/wilabarca/Micro.git
 cd MICROSERVICIO
 ```
 
