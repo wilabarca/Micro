@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -297,6 +299,24 @@ func main() {
 	bookController := NewBookController(bookService)
 
 	router := gin.Default()
+
+	// 🧠 CORS CONFIGURATION
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:3000"}, // Frontend React
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
+	// 🔹 Endpoint con tu apellido
+	router.GET("/abarca", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"nombre_completo": "Wilver De Jesús Abarca Sánchez",
+		})
+	})
+
 	RegisterBookRoutes(router, bookController)
 
 	router.GET("/", func(c *gin.Context) {
@@ -308,12 +328,13 @@ func main() {
 				"POST /books",
 				"PUT /books/:id",
 				"DELETE /books/:id",
+				"GET /abarca",
 			},
 		})
 	})
 
-	log.Println("🚀 Servidor ejecutándose en http://localhost:8080")
-	if err := router.Run(":8080"); err != nil {
+	log.Println("🚀 Servidor ejecutándose en http://localhost:5000")
+	if err := router.Run(":5000"); err != nil {
 		log.Fatalf("❌ Error al iniciar el servidor: %v", err)
 	}
 }
